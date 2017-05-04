@@ -51,6 +51,8 @@ public class ArtistDetailFragment extends Fragment implements ArtistDetailContra
   ArtistDetailContract.Presenter mPresenter;
   @BindView(R.id.artist_art)
   ImageView artistArt;
+  @BindView(R.id.artist_art1)
+  ImageView artistArtSmall;
   @BindView(R.id.toolbar)
   Toolbar toolbar;
   @BindView(R.id.collapsing_toolbar)
@@ -101,16 +103,13 @@ public class ArtistDetailFragment extends Fragment implements ArtistDetailContra
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View root = inflater.inflate(R.layout.fragment_artist_detail, container, false);
-    if (Build.VERSION.SDK_INT >= 19 && Build.VERSION.SDK_INT < 21) {
-      root.findViewById(R.id.app_bar).setFitsSystemWindows(false);
-      root.findViewById(R.id.artist_art).setFitsSystemWindows(false);
-      root.findViewById(R.id.gradient).setFitsSystemWindows(false);
+    /*if (Build.VERSION.SDK_INT >= 19 && Build.VERSION.SDK_INT < 21) {
       Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
       CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) toolbar.getLayoutParams();
       layoutParams.height += DensityUtil.getStatusBarHeight(getContext());
       toolbar.setLayoutParams(layoutParams);
       toolbar.setPadding(0, DensityUtil.getStatusBarHeight(getContext()), 0, 0);
-    }
+    }*/
     return root;
   }
 
@@ -159,6 +158,7 @@ public class ArtistDetailFragment extends Fragment implements ArtistDetailContra
   @Override
   public void showArtistArt(Bitmap bitmap) {
     artistArt.setImageBitmap(bitmap);
+    artistArtSmall.setImageBitmap(bitmap);
     if (ATEUtil.getATEKey(getActivity()).equals("dark_theme")) {
       primaryColor = ATEUtil.getThemePrimaryColor(getContext());
       collapsingToolbarLayout.setContentScrimColor(primaryColor);
@@ -182,6 +182,7 @@ public class ArtistDetailFragment extends Fragment implements ArtistDetailContra
   @Override
   public void showArtistArt(Drawable drawable) {
     artistArt.setImageDrawable(drawable);
+    artistArtSmall.setImageDrawable(drawable);
     primaryColor = ATEUtil.getThemePrimaryColor(getContext());
     collapsingToolbarLayout.setContentScrimColor(primaryColor);
     collapsingToolbarLayout.setStatusBarScrimColor(ColorUtil.getStatusBarColor(primaryColor));

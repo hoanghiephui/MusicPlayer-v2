@@ -24,6 +24,8 @@ public interface QuickControlsContract {
 
     void setAlbumArt(Drawable albumArt);
 
+    void setAlbumArt(String url);
+
     void setTitle(String title);
 
     void setArtist(String artist);

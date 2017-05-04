@@ -14,6 +14,7 @@ import com.media.music.mvp.contract.ArtistDetailContract;
 import com.media.music.mvp.model.ArtistArt;
 import com.media.music.util.ATEUtil;
 import com.media.music.util.PreferencesUtility;
+import com.media.music.widget.DrawGradient;
 
 import rx.subscriptions.CompositeSubscription;
 
@@ -57,23 +58,24 @@ public class ArtistDetailPresenter implements ArtistDetailContract.Presenter {
     if (!TextUtils.isEmpty(artistArtJson)) {
       ArtistArt artistArt = new Gson().fromJson(artistArtJson, ArtistArt.class);
       Glide.with(mView.getContext())
-        .load(artistArt.getExtralarge())
-        .asBitmap()
-        .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-        .priority(Priority.IMMEDIATE)
-        .error(ATEUtil.getDefaultSingerDrawable(mView.getContext()))
-        .into(new SimpleTarget<Bitmap>() {
-          @Override
-          public void onLoadFailed(Exception e, Drawable errorDrawable) {
-            super.onLoadFailed(e, errorDrawable);
-            mView.showArtistArt(errorDrawable);
-          }
+              .load(artistArt.getExtralarge())
+              .asBitmap()
+              .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+              .priority(Priority.IMMEDIATE)
+              .transform(DrawGradient.getInstance(mView.getContext()))
+              .error(ATEUtil.getDefaultSingerDrawable(mView.getContext()))
+              .into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                  super.onLoadFailed(e, errorDrawable);
+                  mView.showArtistArt(errorDrawable);
+                }
 
-          @Override
-          public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-            mView.showArtistArt(resource);
-          }
-        });
+                @Override
+                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                  mView.showArtistArt(resource);
+                }
+              });
     }
   }
 

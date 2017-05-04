@@ -148,6 +148,7 @@ public class QuickControlsPresenter implements QuickControlsContract.Presenter {
     }
 
     if (!mDuetoplaypause) {
+      mView.setAlbumArt(ListenerUtil.getAlbumArtUri(MusicPlayer.getCurrentAlbumId()).toString());
       Glide.with(mView.getContext())
         .load(ListenerUtil.getAlbumArtUri(MusicPlayer.getCurrentAlbumId()).toString())
         .asBitmap()

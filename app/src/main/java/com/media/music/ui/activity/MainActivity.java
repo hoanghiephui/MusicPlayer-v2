@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,6 +38,7 @@ import com.media.music.ui.fragment.ArtistDetailFragment;
 import com.media.music.ui.fragment.FoldersFragment;
 import com.media.music.ui.fragment.MainFragment;
 import com.media.music.ui.fragment.PlayRankingFragment;
+import com.media.music.ui.fragment.PlayerFragment;
 import com.media.music.ui.fragment.PlaylistFragment;
 import com.media.music.ui.fragment.SearchFragment;
 import com.media.music.util.ATEUtil;
@@ -56,7 +58,7 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, DrawerLayout.DrawerListener {
 
   @BindView(R.id.sliding_layout)
-  SlidingUpPanelLayout panelLayout;
+  FrameLayout panelLayout;
   @BindView(R.id.nav_view)
   NavigationView navigationView;
   @BindView(R.id.drawer_layout)
@@ -89,7 +91,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
       navigationView.getMenu().findItem(R.id.nav_library).setChecked(true);
       Fragment fragment = MainFragment.newInstance(Constants.NAVIGATE_ALLSONG);
       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-      transaction.replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
+      transaction.replace(R.id.fragment_container, fragment, MainFragment.class.getName()).commitAllowingStateLoss();
 
     }
   };
@@ -408,27 +410,32 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case android.R.id.home: {
-        if (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-          panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        } else if (isNavigatingMain()) {
+        if (isNavigatingMain()) {
           mDrawerLayout.openDrawer(GravityCompat.START);
-        } else super.onBackPressed();
+        } else {
+          super.onBackPressed();
+        }
         return true;
       }
       case R.id.action_search:
         navigateSearch.run();
         return true;
+      default:
+        return super.onOptionsItemSelected(item);
     }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override
   public void onBackPressed() {
-    if (panelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-      panelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+      mDrawerLayout.closeDrawer(GravityCompat.START);
     } else {
-      if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-        mDrawerLayout.closeDrawer(GravityCompat.START);
+      PlayerFragment fragment = (PlayerFragment) getSupportFragmentManager().findFragmentByTag(PlayerFragment.class.getName());
+      if (fragment != null) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(0, R.anim.fragment_slide_down);
+        ft.remove(fragment);
+        ft.commitAllowingStateLoss();
       } else {
         super.onBackPressed();
       }
@@ -438,11 +445,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
   @Override
   public void onWindowFocusChanged(boolean hasFocus) {
     super.onWindowFocusChanged(hasFocus);
-    if (!listenerSeted && panelLayout.findViewById(R.id.topContainer) != null) {
-      mPanelSlideListener = new PanelSlideListener(panelLayout);
-      panelLayout.addPanelSlideListener(mPanelSlideListener);
-      listenerSeted = true;
-    }
   }
 
   private void subscribeMetaChangedEvent() {

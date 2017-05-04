@@ -1,8 +1,10 @@
 package com.media.music.util;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 
 import com.afollestad.appthemeengine.Config;
@@ -46,13 +48,13 @@ public class ATEUtil {
   public static Drawable getDefaultAlbumDrawable(Context context) {
     TypedValue defaultAlbum = new TypedValue();
     context.getTheme().resolveAttribute(R.attr.default_album_drawable, defaultAlbum, true);
-    return context.getResources().getDrawable(defaultAlbum.resourceId);
+    return ContextCompat.getDrawable(context, defaultAlbum.resourceId);
   }
 
   public static Drawable getDefaultSingerDrawable(Context context) {
     TypedValue defaultSinger = new TypedValue();
     context.getTheme().resolveAttribute(R.attr.default_singer_drawable, defaultSinger, true);
-    return context.getResources().getDrawable(defaultSinger.resourceId);
+    return ContextCompat.getDrawable(context, defaultSinger.resourceId);
   }
 
   public static int getThemeAlbumDefaultPaletteColor(Context context) {

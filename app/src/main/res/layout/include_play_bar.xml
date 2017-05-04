@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topContainer"
+    android:layout_width="match_parent"
+    android:background="@color/white"
+    android:layout_height="57dp">
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_gravity="center_vertical"
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:paddingLeft="10dp"
+      android:paddingRight="10dp">
+
+    <com.media.music.widget.ForegroundImageView
+        android:id="@+id/album_art"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/default_cover"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+      <TextView
+          android:id="@+id/title"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:ellipsize="marquee"
+          android:marqueeRepeatLimit ="marquee_forever"
+          android:scrollHorizontally="true"
+          android:maxLines="1"
+          android:singleLine="true"
+          android:text="Title"
+          android:textSize="16sp"/>
+
+      <TextView
+          android:id="@+id/artist"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:ellipsize="marquee"
+          android:marqueeRepeatLimit ="marquee_forever"
+          android:scrollHorizontally="true"
+          android:singleLine="true"
+          android:maxLines="1"
+          android:textColor="@color/grey"
+          android:textSize="12sp"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/play_pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        android:src="@drawable/play_bar_btn_play_pause_selector"/>
+
+    <ImageView
+        android:id="@+id/next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_play_bar_btn_next"/>
+  </LinearLayout>
+
+  <ProgressBar
+      android:id="@+id/song_progress_normal"
+      style="?android:attr/progressBarStyleHorizontal"
+      android:layout_width="match_parent"
+      android:layout_height="2dp"
+      android:layout_gravity="top"
+      android:progressDrawable="@drawable/progressbar_color"/>
+</FrameLayout>
