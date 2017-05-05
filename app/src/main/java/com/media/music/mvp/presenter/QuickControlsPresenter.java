@@ -128,7 +128,7 @@ public class QuickControlsPresenter implements QuickControlsContract.Presenter {
   @Override
   public void updateNowPlayingCard() {
     if (MusicPlayer.isPlaying()) {
-      if (!mView.getPlayPauseStatus()) {//true表示按钮为待暂停状态
+      if (!mView.getPlayPauseStatus()) {//true
         mView.setPlayPauseButton(true);
       }
     } else {
@@ -140,11 +140,13 @@ public class QuickControlsPresenter implements QuickControlsContract.Presenter {
     final String title = MusicPlayer.getTrackName();
     final String artist = MusicPlayer.getArtistName();
     if (TextUtils.isEmpty(title) || TextUtils.isEmpty(artist)) {
-      mView.setTitle(mView.getContext().getResources().getString(R.string.app_name));
+      mView.setTitle("");
       mView.setArtist("");
+      mView.onSongNull(true);
     } else {
       mView.setTitle(title);
       mView.setArtist(artist);
+      mView.onSongNull(false);
     }
 
     if (!mDuetoplaypause) {

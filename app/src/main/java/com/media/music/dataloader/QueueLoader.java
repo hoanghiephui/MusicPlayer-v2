@@ -51,7 +51,6 @@ public class QueueLoader {
         subscriber.onNext(mSongList);
         subscriber.onCompleted();
         mCursor.close();
-        mCursor = null;
       }
     });
   }

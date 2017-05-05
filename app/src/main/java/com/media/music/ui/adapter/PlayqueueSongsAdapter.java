@@ -1,6 +1,7 @@
 package com.media.music.ui.adapter;
 
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
@@ -60,9 +61,9 @@ public class PlayqueueSongsAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     itemHolder.album.setText(localItem.albumName);
 
     if (mSwatch != null) {
-      itemHolder.title.setTextColor(mSwatch.getBodyTextColor());
-      itemHolder.artist.setTextColor(mSwatch.getTitleTextColor());
-      itemHolder.album.setTextColor(mSwatch.getTitleTextColor());
+      itemHolder.title.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+      itemHolder.artist.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+      itemHolder.album.setTextColor(ContextCompat.getColor(mContext, R.color.white));
 
       if (MusicPlayer.getQueuePosition() == position) {
         itemHolder.playIndicator.setVisibility(View.VISIBLE);
@@ -121,7 +122,7 @@ public class PlayqueueSongsAdapter extends RecyclerView.Adapter<RecyclerView.Vie
       this.popupMenu = (ImageView) view.findViewById(R.id.popup_menu);
       this.playIndicator = view.findViewById(R.id.now_playing_indicator);
 
-      popupMenu.setImageDrawable(mContext.getResources().getDrawable(R.drawable.ic_clear_white_36dp));
+      popupMenu.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.ic_clear_white_36dp));
       popupMenu.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {

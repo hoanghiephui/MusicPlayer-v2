@@ -430,15 +430,19 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
       mDrawerLayout.closeDrawer(GravityCompat.START);
     } else {
-      PlayerFragment fragment = (PlayerFragment) getSupportFragmentManager().findFragmentByTag(PlayerFragment.class.getName());
-      if (fragment != null) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(0, R.anim.fragment_slide_down);
-        ft.remove(fragment);
-        ft.commitAllowingStateLoss();
-      } else {
-        super.onBackPressed();
-      }
+      onHidePlayer();
+    }
+  }
+
+  public void onHidePlayer() {
+    PlayerFragment fragment = (PlayerFragment) getSupportFragmentManager().findFragmentByTag(PlayerFragment.class.getName());
+    if (fragment != null) {
+      FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+      ft.setCustomAnimations(0, R.anim.fragment_slide_down);
+      ft.remove(fragment);
+      ft.commitAllowingStateLoss();
+    } else {
+      super.onBackPressed();
     }
   }
 

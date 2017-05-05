@@ -42,6 +42,8 @@ public interface QuickControlsContract {
 
     void setProgressMax(int max);
 
+    void onSongNull(boolean isNull);
+
   }
 
   interface Presenter extends BasePresenter<View> {

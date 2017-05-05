@@ -1,7 +1,6 @@
 package com.media.music.ui.fragment;
 
 
-import android.animation.ObjectAnimator;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -9,36 +8,28 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ScaleDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.appthemeengine.ATE;
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.media.music.MediaPlayerApp;
 import com.media.music.MusicPlayer;
 import com.media.music.R;
 import com.media.music.RxBus;
-import com.media.music.event.FavourateSongEvent;
 import com.media.music.event.MetaChangedEvent;
 import com.media.music.injector.component.ApplicationComponent;
 import com.media.music.injector.component.DaggerQuickControlsComponent;
@@ -47,18 +38,12 @@ import com.media.music.injector.module.ActivityModule;
 import com.media.music.injector.module.QuickControlsModule;
 import com.media.music.listener.PaletteColorChangeListener;
 import com.media.music.mvp.contract.QuickControlsContract;
-import com.media.music.provider.FavoriteSong;
-import com.media.music.ui.dialogs.PlayqueueDialog;
 import com.media.music.util.ATEUtil;
 import com.media.music.util.ColorUtil;
-import com.media.music.util.ListenerUtil;
-import com.media.music.util.NavigationUtil;
 import com.media.music.util.ScrimUtil;
 import com.media.music.widget.ForegroundImageView;
-import com.media.music.widget.timely.TimelyView;
 
 import java.io.File;
-import java.security.InvalidParameterException;
 
 import javax.inject.Inject;
 
@@ -90,46 +75,11 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
   TextView mArtist;
   @BindView(R.id.album_art)
   ForegroundImageView mAlbumArt;
-  /*@BindView(R.id.previous)
-  ImageView previous;*/
   @BindView(R.id.next)
   ImageView next;
-  /*@BindView(R.id.heart)
-  MaterialIconView favorite;
-  @BindView(R.id.ic_play_queue)
-  MaterialIconView iconPlayQueue;
-  @BindView(R.id.lyric_view)
-  LyricView mLyricView;
-  @BindView(R.id.popup_menu)
-  ImageView popupMenu;
-  @BindView(R.id.seek_song_touch)
-  SeekBar mSeekBar;
-  @BindView(R.id.timelyView11)
-  TimelyView timelyView11;
-  @BindView(R.id.timelyView12)
-  TimelyView timelyView12;
-  @BindView(R.id.timelyView13)
-  TimelyView timelyView13;
-  @BindView(R.id.timelyView14)
-  TimelyView timelyView14;
-  @BindView(R.id.timelyView15)
-  TimelyView timelyView15;
-  @BindView(R.id.hour_colon)
-  TextView hourColon;
-  @BindView(R.id.minute_colon)
-  TextView minuteColon;
-  @BindView(R.id.song_elapsedtime)
-  LinearLayout songElapsedTime;*/
 
-  private int blackWhiteColor;
-  private Handler mElapsedTimeHandler;
-  private int[] timeArr = new int[]{0, 0, 0, 0, 0};
   private static PaletteColorChangeListener sListener;
-  private PlayqueueDialog bottomDialogFragment;
-  private FrameLayout mSlidingUpPanelLayout;
-  private Palette.Swatch mSwatch;
-  private boolean mIsFavorite = false;
-
+  private boolean isSongNull = false;
 
   private Runnable mUpdateProgress = new Runnable() {
 
@@ -138,44 +88,9 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
 
       long position = MusicPlayer.position();
       mProgress.setProgress((int) position);
-      //mSeekBar.setProgress((int) position);
-      //mLyricView.setCurrentTimeMillis(position);
       if (MusicPlayer.isPlaying()) {
         mProgress.postDelayed(mUpdateProgress, 50);
       } else mProgress.removeCallbacks(this);
-
-    }
-  };
-
-  private Runnable mUpdateElapsedTime = new Runnable() {
-    @Override
-    public void run() {
-      /*if (getActivity() != null) {
-        String time = ListenerUtil.makeShortTimeString(getActivity(), mSeekBar.getProgress() / 1000);
-        if (time.length() < 5) {
-          timelyView11.setVisibility(View.GONE);
-          timelyView12.setVisibility(View.GONE);
-          hourColon.setVisibility(View.GONE);
-          tv13(time.charAt(0) - '0');
-          tv14(time.charAt(2) - '0');
-          tv15(time.charAt(3) - '0');
-        } else if (time.length() == 5) {
-          timelyView12.setVisibility(View.VISIBLE);
-          tv12(time.charAt(0) - '0');
-          tv13(time.charAt(1) - '0');
-          tv14(time.charAt(3) - '0');
-          tv15(time.charAt(4) - '0');
-        } else {
-          timelyView11.setVisibility(View.VISIBLE);
-          hourColon.setVisibility(View.VISIBLE);
-          tv11(time.charAt(0) - '0');
-          tv12(time.charAt(2) - '0');
-          tv13(time.charAt(3) - '0');
-          tv14(time.charAt(5) - '0');
-          tv15(time.charAt(6) - '0');
-        }
-        mElapsedTimeHandler.postDelayed(this, 600);
-      }*/
 
     }
   };
@@ -209,52 +124,22 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
   @Override
   public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-
     ATE.apply(this, ATEUtil.getATEKey(getActivity()));
-
-    mSlidingUpPanelLayout = (FrameLayout) view.getParent().getParent();
-
-    //setUpPopupMenu(popupMenu);
-
-    /*mLyricView.setLineSpace(15.0f);
-    mLyricView.setTextSize(17.0f);
-    mLyricView.setPlayable(false);
-    mLyricView.setTranslationY(DensityUtil.getScreenWidth(getActivity()) + DensityUtil.dip2px(getActivity(), 120));
-    mLyricView.setOnPlayerClickListener(new LyricView.OnPlayerClickListener() {
-      @Override
-      public void onPlayerClicked(long progress, String content) {
-        MusicPlayer.seek((long) progress);
-        if (!MusicPlayer.isPlaying()) {
-          mPresenter.onPlayPauseClick();
-        }
-      }
-    });*/
 
     FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mProgress.getLayoutParams();
     mProgress.measure(0, 0);
-    //layoutParams.setMargins(0, -(mProgress.getMeasuredHeight() / 2), 0, 0);
     mProgress.setLayoutParams(layoutParams);
     ScaleDrawable scaleDrawable = (ScaleDrawable) ((LayerDrawable) mProgress.getProgressDrawable()).findDrawableByLayerId(R.id.progress);
     GradientDrawable gradientDrawable = (GradientDrawable) scaleDrawable.getDrawable();
     int colorAccent = ATEUtil.getThemeAccentColor(getActivity());
-    gradientDrawable.setColors(new int[]{colorAccent, colorAccent, colorAccent});
-
-    //清除默认的左右边距
-    /*mSeekBar.setPadding(0, DensityUtil.dip2px(getContext(), 36), 0, 0);
-    mSeekBar.setSecondaryProgress(mSeekBar.getMax());
-
-    songElapsedTime.setY((DensityUtil.getScreenWidth(getContext()) - songElapsedTime.getHeight()) / 2);*/
-
-    setUpTimelyView();
-    setSeekBarListener();
-
+    if (gradientDrawable != null) {
+      gradientDrawable.setColors(new int[]{colorAccent, colorAccent, colorAccent});
+    }
     if (mPlayPauseView != null) {
       if (MusicPlayer.isPlaying())
         mPlayPauseView.setSelected(true);
       else mPlayPauseView.setSelected(false);
     }
-
-    subscribeFavourateSongEvent();
     subscribeMetaChangedEvent();
   }
 
@@ -268,11 +153,6 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
 
   @Override
   public void showLyric(File file) {
-    if (file == null) {
-     // mLyricView.reset("暂无歌词");
-    } else {
-      //mLyricView.setLyricFile(file, "UTF-8");
-    }
   }
 
   @Override
@@ -284,119 +164,6 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
     }
   }
 
-  private void setUpTimelyView() {
-    /*if (timelyView11 != null) {
-      String time = ListenerUtil.makeShortTimeString(getActivity(), MusicPlayer.position() / 1000);
-      if (time.length() < 5) {
-        timelyView11.setVisibility(View.GONE);
-        timelyView12.setVisibility(View.GONE);
-        hourColon.setVisibility(View.GONE);
-
-        changeDigit(timelyView13, time.charAt(0) - '0');
-        changeDigit(timelyView14, time.charAt(2) - '0');
-        changeDigit(timelyView15, time.charAt(3) - '0');
-
-      } else if (time.length() == 5) {
-        timelyView12.setVisibility(View.VISIBLE);
-        changeDigit(timelyView12, time.charAt(0) - '0');
-        changeDigit(timelyView13, time.charAt(1) - '0');
-        changeDigit(timelyView14, time.charAt(3) - '0');
-        changeDigit(timelyView15, time.charAt(4) - '0');
-      } else {
-        timelyView11.setVisibility(View.VISIBLE);
-        hourColon.setVisibility(View.VISIBLE);
-        changeDigit(timelyView11, time.charAt(0) - '0');
-        changeDigit(timelyView12, time.charAt(2) - '0');
-        changeDigit(timelyView13, time.charAt(3) - '0');
-        changeDigit(timelyView14, time.charAt(5) - '0');
-        changeDigit(timelyView15, time.charAt(6) - '0');
-      }
-    }
-
-    if (timelyView11 != null) {
-      mElapsedTimeHandler = new Handler();
-      mElapsedTimeHandler.postDelayed(mUpdateElapsedTime, 600);
-    }*/
-
-  }
-
-  private void setUpPopupMenu(ImageView popupMenu) {
-    popupMenu.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        final PopupMenu menu = new PopupMenu(getContext(), v);
-        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-          @Override
-          public boolean onMenuItemClick(MenuItem item) {
-            switch (item.getItemId()) {
-              case R.id.popup_song_goto_album:
-                if (mSlidingUpPanelLayout != null) {
-                  //mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                  NavigationUtil.navigateToAlbum(getActivity(), MusicPlayer.getCurrentAlbumId(),
-                    MusicPlayer.getAlbumName(), null);
-                }
-                break;
-              case R.id.popup_song_goto_artist:
-                if (mSlidingUpPanelLayout != null) {
-                  //mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                  NavigationUtil.navigateToAlbum(getActivity(), MusicPlayer.getCurrentArtistId(),
-                    MusicPlayer.getArtistName(), null);
-                }
-                break;
-              case R.id.popup_song_addto_playlist:
-                ListenerUtil.showAddPlaylistDialog(getActivity(), new long[]{MusicPlayer.getCurrentAudioId()});
-                break;
-              case R.id.popup_song_delete:
-                long[] deleteIds = {MusicPlayer.getCurrentAudioId()};
-                ListenerUtil.showDeleteDialog(getContext(), MusicPlayer.getTrackName(), deleteIds,
-                  new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-                    }
-                  });
-                break;
-            }
-            return false;
-          }
-        });
-        menu.inflate(R.menu.menu_now_playing);
-        menu.show();
-      }
-    });
-  }
-
-  private void setSeekBarListener() {
-    /*if (mSeekBar != null)
-      mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-          if (fromUser) {
-            if (songElapsedTime.getVisibility() == View.GONE) {
-              songElapsedTime.setVisibility(View.VISIBLE);
-            }
-            mProgress.removeCallbacks(mUpdateProgress);
-          }
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-          songElapsedTime.setVisibility(View.GONE);
-          MusicPlayer.seek((long) seekBar.getProgress());
-          mProgress.postDelayed(mUpdateProgress, 10);
-        }
-      });*/
-  }
-
-  /**
-   * 返回暂停播放按钮的状态
-   *
-   * @return true表示按钮为待暂定状态, false表示按钮为待播放状态
-   */
   @Override
   public boolean getPlayPauseStatus() {
     return mPlayPauseView.isSelected();
@@ -410,7 +177,11 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
   @Override
   public void setProgressMax(int max) {
     mProgress.setMax(max);
-    //mSeekBar.setMax(max);
+  }
+
+  @Override
+  public void onSongNull(boolean isNull) {
+    isSongNull = isNull;
   }
 
   @Override
@@ -428,8 +199,8 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
       topContainer.setBackgroundColor(paletteColor.data);
       mPlayPauseView.setColorFilter(ATEUtil.getThemeAccentColor(getActivity()));
       mPlayPauseView.setEnabled(false);
-      //next.setEnabled(false);
-      //next.setColor(ATEUtil.getThemeAccentColor(getContext()));
+      next.setEnabled(false);
+      next.setColorFilter(ATEUtil.getThemeAccentColor(getContext()));
       if (sListener != null) {
         sListener.onPaletteColorChange(paletteColor.data, ATEUtil.getThemeAccentColor(getActivity()));
       }
@@ -438,7 +209,6 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
 
   @Override
   public void setAlbumArt(String url) {
-
   }
 
   @Override
@@ -453,7 +223,7 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
 
   @Override
   public void setPalette(Palette palette) {
-    mSwatch = ColorUtil.getMostPopulousSwatch(palette);
+    Palette.Swatch mSwatch = ColorUtil.getMostPopulousSwatch(palette);
     int paletteColor;
     if (mSwatch != null) {
       paletteColor = mSwatch.getRgb();
@@ -469,149 +239,61 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
         mArtist.setTextColor(artistColor);
       } else {
         paletteColor = ATEUtil.getThemeAlbumDefaultPaletteColor(getContext());
-        mTitle.setTextColor(getResources().getColor(android.R.color.primary_text_light));
-        mArtist.setTextColor(getResources().getColor(android.R.color.secondary_text_light));
+        mTitle.setTextColor(ContextCompat.getColor(getContext(), android.R.color.primary_text_light));
+        mArtist.setTextColor(ContextCompat.getColor(getContext(), android.R.color.secondary_text_light));
       }
 
     }
     //set icon color
-    blackWhiteColor = ColorUtil.getBlackWhiteColor(paletteColor);
+    int blackWhiteColor = ColorUtil.getBlackWhiteColor(paletteColor);
     topContainer.setBackgroundColor(paletteColor);
-    if (bottomDialogFragment != null && mSwatch != null) {
-      bottomDialogFragment.setPaletteSwatch(mSwatch);
-    }
-    /*mLyricView.setHighLightTextColor(blackWhiteColor);
-    mLyricView.setDefaultColor(blackWhiteColor);
-    mLyricView.setTouchable(false);
-    mLyricView.setHintColor(blackWhiteColor);*/
-    mPlayPauseView.setColorFilter(blackWhiteColor);/*
-    mPlayPauseView.setCircleColor(blackWhiteColor);
-    mPlayPauseView.setCircleAlpah(0);*/
+    mPlayPauseView.setColorFilter(blackWhiteColor);
     mPlayPauseView.setEnabled(true);
-    //next.setEnabled(true);
-    //next.setColor(blackWhiteColor);
     next.setColorFilter(blackWhiteColor);
-    //next.setColor(blackWhiteColor);
-    //iconPlayQueue.setColor(blackWhiteColor);
-
-    //set timely color
-    setTimelyColor(blackWhiteColor);
-
-    //set seekbar progressdrawable
-    /*ScaleDrawable scaleDrawable = (ScaleDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable()).findDrawableByLayerId(R.id.progress);
-    GradientDrawable gradientDrawable = (GradientDrawable) scaleDrawable.getDrawable();
-    gradientDrawable.setColors(new int[]{blackWhiteColor, blackWhiteColor, blackWhiteColor});*/
-
-    mIsFavorite = FavoriteSong.getInstance(getContext()).isFavorite(MusicPlayer.getCurrentAudioId());
-    if (mIsFavorite) {
-      //favorite.setColor(Color.parseColor("#E97767"));
-    } else {
-      //favorite.setColor(blackWhiteColor);
-    }
     //set albumart foreground
     if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
       mAlbumArt.setForeground(
         ScrimUtil.makeCubicGradientScrimDrawable(
-          paletteColor, //颜色
-          8, //渐变层数
-          Gravity.CENTER_HORIZONTAL)); //起始方向
-
+          paletteColor,
+          8,
+          Gravity.CENTER_HORIZONTAL));
     }
 
     if (sListener != null) {
       sListener.onPaletteColorChange(paletteColor, blackWhiteColor);
     }
-
   }
 
   @OnClick(R.id.topContainer)
   public void onUpIndicatorClick() {
-    Fragment fragment = new PlayerFragment();
-    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-    transaction.setCustomAnimations(R.anim.fragment_slide_up, 0);
-    transaction.replace(android.R.id.content, fragment, PlayerFragment.class.getName()).commit();
-    //startActivity(new Intent(getActivity(), PlayerFragment.class));
-    if (mSlidingUpPanelLayout != null) {
-      //mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    if (isSongNull) {
+      Snackbar.make(topContainer, getText(R.string.song_null), Snackbar.LENGTH_LONG).show();
+    } else {
+      Fragment fragment = new PlayerFragment();
+      FragmentTransaction transaction = getFragmentManager().beginTransaction();
+      transaction.setCustomAnimations(R.anim.fragment_slide_up, 0);
+      transaction.replace(android.R.id.content, fragment, PlayerFragment.class.getName()).commit();
     }
   }
 
   @OnClick(R.id.play_pause)
   public void onPlayPauseClick() {
-    mPresenter.onPlayPauseClick();
+    if (isSongNull) {
+      Snackbar.make(topContainer, getText(R.string.song_null), Snackbar.LENGTH_LONG).show();
+    } else {
+      mPresenter.onPlayPauseClick();
+    }
   }
 
   @OnClick(R.id.next)
   public void onNextClick() {
-    mPresenter.onNextClick();
-  }
-
-  //@OnClick(R.id.previous)
-  public void onPreviousClick() {
-    mPresenter.onPreviousClick();
-  }
-
-  //@OnClick(R.id.ic_play_queue)
-  public void onPlayQueueClick() {
-    FragmentManager fm = getActivity().getSupportFragmentManager();
-    if (bottomDialogFragment == null) {
-      bottomDialogFragment = new PlayqueueDialog();
-    }
-    bottomDialogFragment.show(fm, "fragment_bottom_dialog");
-    if (mSwatch != null) {
-      bottomDialogFragment.setPaletteSwatch(mSwatch);
-
-    }
-  }
-
-  //@OnClick(R.id.heart)
-  public void onFavoriteClick() {
-    if (mIsFavorite) {
-      int num = FavoriteSong.getInstance(getContext()).removeFavoriteSong(new long[]{MusicPlayer.getCurrentAudioId()});
-      if (num == 1) {
-        //favorite.setColor(blackWhiteColor);
-        mIsFavorite = false;
-        RxBus.getInstance().post(new FavourateSongEvent());
-        Toast.makeText(getContext(), R.string.remove_favorite_success, Toast.LENGTH_SHORT).show();
-      } else {
-        Toast.makeText(getContext(), R.string.remove_favorite_fail, Toast.LENGTH_SHORT).show();
-      }
+    if (isSongNull) {
+      Snackbar.make(topContainer, getText(R.string.song_null), Snackbar.LENGTH_LONG).show();
     } else {
-      int num = FavoriteSong.getInstance(getContext()).addFavoriteSong(new long[]{MusicPlayer.getCurrentAudioId()});
-      if (num == 1) {
-        //favorite.setColor(Color.parseColor("#E97767"));
-        mIsFavorite = true;
-        RxBus.getInstance().post(new FavourateSongEvent());
-        Toast.makeText(getContext(), R.string.add_favorite_success, Toast.LENGTH_SHORT).show();
-      } else {
-        Toast.makeText(getContext(), R.string.add_favorite_fail, Toast.LENGTH_SHORT).show();
-      }
+      mPresenter.onNextClick();
     }
   }
 
-  private void subscribeFavourateSongEvent() {
-    Subscription subscription = RxBus.getInstance()
-      .toObservable(FavourateSongEvent.class)
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(new Action1<FavourateSongEvent>() {
-        @Override
-        public void call(FavourateSongEvent event) {
-          mIsFavorite = FavoriteSong.getInstance(getContext()).isFavorite(MusicPlayer.getCurrentAudioId());
-          if (mIsFavorite) {
-            //favorite.setColor(Color.parseColor("#E97767"));
-          } else {
-            //favorite.setColor(blackWhiteColor);
-          }
-        }
-      }, new Action1<Throwable>() {
-        @Override
-        public void call(Throwable throwable) {
-
-        }
-      });
-    RxBus.getInstance().addSubscription(this, subscription);
-  }
 
   private void subscribeMetaChangedEvent() {
     Subscription subscription = RxBus.getInstance()
@@ -635,66 +317,5 @@ public class QuickControlsFragment extends Fragment implements QuickControlsCont
 
   public static void setPaletteColorChangeListener(PaletteColorChangeListener paletteColorChangeListener) {
     sListener = paletteColorChangeListener;
-  }
-
-  private void changeDigit(TimelyView tv, int end) {
-    ObjectAnimator obja = tv.animate(end);
-    obja.setDuration(400);
-    obja.start();
-  }
-
-  private void setTimelyColor(@ColorInt int color) {
-    /*hourColon.setTextColor(color);
-    minuteColon.setTextColor(color);
-    timelyView11.setTextColor(color);
-    timelyView12.setTextColor(color);
-    timelyView13.setTextColor(color);
-    timelyView14.setTextColor(color);
-    timelyView15.setTextColor(color);*/
-  }
-
-  private void changeDigit(TimelyView tv, int start, int end) {
-    try {
-      ObjectAnimator obja = tv.animate(start, end);
-      obja.setDuration(400);
-      obja.start();
-    } catch (InvalidParameterException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void tv11(int a) {
-    if (a != timeArr[0]) {
-      //changeDigit(timelyView11, timeArr[0], a);
-      timeArr[0] = a;
-    }
-  }
-
-  private void tv12(int a) {
-    if (a != timeArr[1]) {
-      //changeDigit(timelyView12, timeArr[1], a);
-      timeArr[1] = a;
-    }
-  }
-
-  private void tv13(int a) {
-    if (a != timeArr[2]) {
-      //changeDigit(timelyView13, timeArr[2], a);
-      timeArr[2] = a;
-    }
-  }
-
-  private void tv14(int a) {
-    if (a != timeArr[3]) {
-      //changeDigit(timelyView14, timeArr[3], a);
-      timeArr[3] = a;
-    }
-  }
-
-  private void tv15(int a) {
-    if (a != timeArr[4]) {
-      //changeDigit(timelyView15, timeArr[4], a);
-      timeArr[4] = a;
-    }
   }
 }

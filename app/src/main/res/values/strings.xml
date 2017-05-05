@@ -107,4 +107,5 @@
     <string name="color">Color</string>
     <string name="sure">Sure</string>
   <string name="play_time_start">00:00</string>
+  <string name="song_null">Please select a song from the list</string>
 </resources>
